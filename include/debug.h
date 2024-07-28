@@ -26,6 +26,17 @@ bool DEBUG_ExitLoop(void);
 void DEBUG_RefreshPage(char scroll);
 Bitu DEBUG_EnableDebugger(void);
 
+// Exposed for GDB server
+uint32_t DEBUG_GetRegister(int reg);
+void DEBUG_SetRegister(int reg, uint32_t value);
+uint8_t DEBUG_ReadMemory(uint32_t address);
+void DEBUG_WriteMemory(uint32_t address, uint8_t value);
+void DEBUG_Step();
+void DEBUG_Continue();
+bool DEBUG_SetBreakpoint(uint32_t address);
+bool DEBUG_RemoveBreakpoint(uint32_t address);
+void DEBUG_InitGDBStub(int port);
+
 extern Bitu cycle_count;
 extern Bitu debugCallback;
 

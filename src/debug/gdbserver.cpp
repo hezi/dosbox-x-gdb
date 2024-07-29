@@ -21,7 +21,7 @@ std::string get_next_async_event() {
 }
 
 void GDBServer::run() {
-    DEBUG_ShowMsg("About to start GDBServer");
+    DEBUG_ShowMsg("GDBServer: Starting...");
     setup_socket();
 
     while (true) {
@@ -35,12 +35,12 @@ void GDBServer::setup_socket() {
     int opt = 1;
 
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        DEBUG_ShowMsg("socket failed");
+        DEBUG_ShowMsg("GDBServer: socket failed");
         exit(EXIT_FAILURE);
     }
 
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
-        DEBUG_ShowMsg("setsockopt");
+        DEBUG_ShowMsg("GDBServer: setsockopt");
         exit(EXIT_FAILURE);
     }
 
@@ -49,32 +49,32 @@ void GDBServer::setup_socket() {
     address.sin_port = htons(port);
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        DEBUG_ShowMsg("bind failed");
+        DEBUG_ShowMsg("GDBServer: bind failed");
         exit(EXIT_FAILURE);
     }
 
     if (listen(server_fd, 1) < 0) {
-        DEBUG_ShowMsg("listen");
+        DEBUG_ShowMsg("GDBServer: listen failure");
         exit(EXIT_FAILURE);
     }
 
-    DEBUG_ShowMsg("GDB server listening on port %d", port);
+    DEBUG_ShowMsg("GDBServer: Listening on port %d", port);
 }
 
 void GDBServer::wait_for_client() {
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
-    DEBUG_ShowMsg("Waiting for client connection...");
+    DEBUG_ShowMsg("GDBServer: Waiting for client connection...");
     if ((client_fd = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
         DEBUG_ShowMsg("accept");
         exit(EXIT_FAILURE);
     }
-    DEBUG_ShowMsg("Client connected");
+    DEBUG_ShowMsg("GDBServer: Client connected");
 }
 
 void GDBServer::handle_client() {
-    DEBUG_ShowMsg("Handling client");
+    DEBUG_ShowMsg("GDBServer: Handling client");
 
     // Perform initial handshake
     if (!perform_handshake()) {
@@ -85,7 +85,6 @@ void GDBServer::handle_client() {
 
     while (true) {
         std::string packet = receive_packet();
-        //DEBUG_ShowMsg("GDB: Received packet %s", packet.c_str());
         if (packet.empty()) break;
         process_command(packet);
 
@@ -97,15 +96,16 @@ void GDBServer::handle_client() {
 
     }
 
+    DEBUG_ShowMsg("GDBServer: closing client");
     close(client_fd);
 }
 
 bool GDBServer::perform_handshake() {
     std::string handshake = receive_packet();
-    DEBUG_ShowMsg("Received handshake: %s", handshake.c_str());
+    DEBUG_ShowMsg("GDBServer: Received handshake - %s", handshake.c_str());
 
     if (handshake.substr(0, 10) != "qSupported") {
-        DEBUG_ShowMsg("Unexpected initial packet: %s", handshake.c_str());
+        DEBUG_ShowMsg("GDBServer: Unexpected initial packet - %s", handshake.c_str());
         return false;
     }
 
@@ -116,8 +116,7 @@ bool GDBServer::perform_handshake() {
                            "vContSupported+;" // vCont packet for continuing and stepping
                            "QStartNoAckMode+"; // no ack mode
     send_packet(response);
-    DEBUG_ShowMsg("Sent supported features: %s", response.c_str());
-
+    DEBUG_ShowMsg("GDBServer: Sent supported features - %s", response.c_str());
 
     return true;
 }
@@ -130,7 +129,7 @@ std::string GDBServer::receive_packet() {
     // Wait for the start of the packet
     while (true) {
         if (read(client_fd, &c, 1) <= 0) {
-            DEBUG_ShowMsg("Error reading from client or client disconnected");
+            DEBUG_ShowMsg("GDBServer: Error reading from client or client disconnected");
             return "";
         }
         if (c == '$') break;
@@ -139,7 +138,7 @@ std::string GDBServer::receive_packet() {
     // Read the packet content
     while (true) {
         if (read(client_fd, &c, 1) <= 0) {
-            DEBUG_ShowMsg("Error reading packet content");
+            DEBUG_ShowMsg("GDBServer: Error reading packet content");
             return "";
         }
         if (c == '#') break;
@@ -149,7 +148,7 @@ std::string GDBServer::receive_packet() {
     // Read the checksum
     char checksum[2];
     if (read(client_fd, checksum, 2) <= 0) {
-        DEBUG_ShowMsg("Error reading checksum");
+        DEBUG_ShowMsg("GDBServer: Error reading checksum");
         return "";
     }
 
@@ -161,7 +160,7 @@ std::string GDBServer::receive_packet() {
     }
 
     if (received_checksum != calculated_checksum) {
-        DEBUG_ShowMsg("Checksum mismatch: received 0x%02x, calculated 0x%02x", received_checksum, calculated_checksum);
+        DEBUG_ShowMsg("GDBServer: Checksum mismatch! received 0x%02x, calculated 0x%02x", received_checksum, calculated_checksum);
         if (!noack_mode) {
             write(client_fd, "-", 1);
         }
@@ -173,13 +172,13 @@ std::string GDBServer::receive_packet() {
         write(client_fd, "+", 1);
     }
 
-    DEBUG_ShowMsg("<< %s", packet.c_str());
+    DEBUG_ShowMsg("GDBServer: << %s", packet.c_str());
 
     return packet;
 }
 
 void GDBServer::send_packet(const std::string& packet) {
-    DEBUG_ShowMsg(">> %s", packet.c_str());
+    DEBUG_ShowMsg("GDBServer: >> %s", packet.c_str());
     std::string response = "$" + packet + "#";
     uint8_t checksum = 0;
     for (char c : packet) {
@@ -211,7 +210,7 @@ void GDBServer::signal_breakpoint() {
 
 void GDBServer::process_command(const std::string& cmd) {
     processing = true;
-    DEBUG_ShowMsg("Processing command: %s", cmd.c_str());
+    //DEBUG_ShowMsg("GDBServer: Processing command %s", cmd.c_str());
     if(cmd == "QStartNoAckMode") {
         noack_mode = true;
         send_packet("OK");
@@ -244,11 +243,11 @@ void GDBServer::process_command(const std::string& cmd) {
     } else if (cmd.substr(0, 4) == "vCont") {
         handle_v_packets(cmd.substr(5));
     } else {
-        DEBUG_ShowMsg("Unhandled command: %s", cmd.c_str());
+        DEBUG_ShowMsg("GDBServer: Unhandled command %s", cmd.c_str());
         send_packet("");
     }
 
-    DEBUG_ShowMsg("Finished processing command: %s", cmd.c_str());
+    //DEBUG_ShowMsg("GDBServer: Finished processing command %s", cmd.c_str());
     processing = false;
 
     // After processing, check for any pending async events
@@ -367,7 +366,7 @@ void GDBServer::handle_write_memory(const std::string& args) {
 
 void GDBServer::handle_step() {
     DEBUG_Step();
-    send_packet("S05");  // Assuming SIGTRAP as the stop reason
+    //send_packet("S05");  // Assuming SIGTRAP as the stop reason
 }
 
 void GDBServer::handle_continue() {

@@ -140,3 +140,6 @@ contrib/macos/dosbox-x.plist
 /dosbox-x.conf
 /src/dosbox-x.conf
 
+# lsp cache
+.cache/
+

@@ -26,6 +26,7 @@
 #include "jfont.h"
 #include "shiftjis.h"
 #include "callback.h"
+#include "ttyserver.h"
 
 #define NUMBER_ANSI_DATA 10
 
@@ -1621,6 +1622,11 @@ void device_CON::ClearAnsi(void){
 }
 
 void device_CON::Output(uint8_t chr) {
+	/* Report the character once here. The branches below reach the screen through
+	 * INT 29h and/or INT 10h AH=0Eh, which capture as well, so suppress those. */
+	TTYSERVER_CharOut(chr);
+	TTYServerSuppress tty_suppress;
+
 	if (!ANSI_SYS_installed() && !IS_PC98_ARCH) {
 		uint16_t oldax=reg_ax;
 		reg_ax=chr;

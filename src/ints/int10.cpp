@@ -31,6 +31,7 @@
 #include "setup.h"
 #include "render.h"
 #include "jfont.h"
+#include "ttyserver.h"
 
 Int10Data int10;
 bool blinking=true;
@@ -203,6 +204,7 @@ Bitu INT10_Handler(void) {
 		INT10_GetPixel(reg_cx,reg_dx,reg_bh,&reg_al);
 		break;
 	case 0x0E:								/* Teletype OutPut */
+		TTYSERVER_CharOut(reg_al);
 		if(DOSV_CheckCJKVideoMode()) {
 			uint16_t attr;
 			INT10_ReadCharAttr(&attr, 0);

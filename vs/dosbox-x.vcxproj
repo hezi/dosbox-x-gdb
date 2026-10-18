@@ -1152,6 +1152,7 @@ for /d %%i in ("$(SolutionDir)\..\contrib\translations\*") do copy "%%i\*.lng" "
     <ClCompile Include="..\src\debug\debug_disasm.cpp" />
     <ClCompile Include="..\src\debug\debug_gui.cpp" />
     <ClCompile Include="..\src\debug\debug_win32.cpp" />
+    <ClCompile Include="..\src\debug\gdbserver.cpp" />
     <ClCompile Include="..\src\dosbox.cpp" />
     <ClCompile Include="..\src\dos\cdrom.cpp" />
     <ClCompile Include="..\src\dos\cdrom_aspi_win32.cpp" />
@@ -1536,6 +1537,8 @@ for /d %%i in ("$(SolutionDir)\..\contrib\translations\*") do copy "%%i\*.lng" "
     <ClCompile Include="..\src\libs\gui_tk\gui_tk.cpp" />
     <ClCompile Include="..\src\libs\passthroughio\passthroughio.cpp" />
     <ClCompile Include="..\src\misc\clipboard.cpp" />
+    <ClCompile Include="..\src\misc\ttyserver.cpp" />
+    <ClCompile Include="..\src\misc\memmonserver.cpp" />
     <ClCompile Include="..\src\misc\cross.cpp" />
     <ClCompile Include="..\src\misc\ethernet.cpp" />
     <ClCompile Include="..\src\misc\messages.cpp" />

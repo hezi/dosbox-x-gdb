@@ -4836,6 +4836,50 @@ void DOSBOX_SetupConfigSections(void) {
     Pbool->Set_help("If set, DOSBox-X can lower the host system's CPU load when a supported guest program is idle.");
     Pbool->SetBasic(true);
 
+    secprop=control->AddSection_prop("ttyserver",&Null_Init,true);
+    Pbool = secprop->Add_bool("ttyserver", Property::Changeable::OnlyAtStart, false);
+    Pbool->Set_help("Enable the TTY server. It mirrors every character the guest prints through BIOS INT 10h AH=0Eh\n"
+                    "or through the DOS CON device to any client connected to the TCP port below, and injects\n"
+                    "bytes received from that client into the BIOS keyboard buffer as if they had been typed.\n"
+                    "Intended for driving a DOS program from an external application; connect with telnet to use it.");
+    Pbool->SetBasic(true);
+
+    Pint = secprop->Add_int("port", Property::Changeable::OnlyAtStart, 2160);
+    Pint->Set_help("TCP port the TTY server listens on.");
+    Pint->SetBasic(true);
+
+    Pstring = secprop->Add_string("bindaddress", Property::Changeable::OnlyAtStart, "127.0.0.1");
+    Pstring->Set_help("Address the TTY server binds to. The default only accepts connections from this machine;\n"
+                      "use 'any' to accept connections from the network. There is no authentication, and a client\n"
+                      "can type anything it likes into the guest, so only open this up on a network you trust.");
+    Pstring->SetBasic(true);
+
+    Pbool = secprop->Add_bool("telnet", Property::Changeable::OnlyAtStart, true);
+    Pbool->Set_help("If set, speak the telnet protocol: negotiate character-at-a-time mode on connect and strip\n"
+                    "option negotiation out of the incoming data. Turn this off for a raw TCP byte stream.");
+
+    Pbool = secprop->Add_bool("crlf", Property::Changeable::OnlyAtStart, true);
+    Pbool->Set_help("If set, a line feed that is not already preceded by a carriage return is sent as CR LF,\n"
+                    "so that output lines up in a terminal. Turn this off to get the guest's bytes unmodified.");
+
+    secprop=control->AddSection_prop("memmonserver",&Null_Init,true);
+    Pbool = secprop->Add_bool("memmonserver", Property::Changeable::OnlyAtStart, false);
+    Pbool->Set_help("Enable the memory monitor server. It is a small line-command console, reachable with an\n"
+                    "ordinary telnet client on the TCP port below, for inspecting and modifying the emulated\n"
+                    "machine's memory and CPU registers (hex dump, byte/word/dword read and write, fill,\n"
+                    "search, and register display/edit). Type 'help' after connecting for the command list.\n"
+                    "There is no authentication, so only open this up on a network you trust.");
+    Pbool->SetBasic(true);
+
+    Pint = secprop->Add_int("port", Property::Changeable::OnlyAtStart, 2161);
+    Pint->Set_help("TCP port the memory monitor server listens on.");
+    Pint->SetBasic(true);
+
+    Pstring = secprop->Add_string("bindaddress", Property::Changeable::OnlyAtStart, "127.0.0.1");
+    Pstring->Set_help("Address the memory monitor server binds to. The default only accepts connections from\n"
+                      "this machine; use 'any' to accept connections from the network.");
+    Pstring->SetBasic(true);
+
     secprop=control->AddSection_prop("ipx",&Null_Init,true);
     Pbool = secprop->Add_bool("ipx",Property::Changeable::WhenIdle, false);
     Pbool->Set_help("Enable ipx over UDP/IP emulation.");

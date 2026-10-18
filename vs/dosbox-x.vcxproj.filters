@@ -654,6 +654,12 @@
     <ClCompile Include="..\src\misc\clipboard.cpp">
       <Filter>Sources\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\misc\ttyserver.cpp">
+      <Filter>Sources\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\misc\memmonserver.cpp">
+      <Filter>Sources\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\misc\cross.cpp">
       <Filter>Sources\misc</Filter>
     </ClCompile>
@@ -1651,6 +1657,9 @@
     </ClCompile>
     <ClCompile Include="..\src\builtin\ne2000bin.cpp">
       <Filter>Sources\builtin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debug\gdbserver.cpp">
+      <Filter>Sources\misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

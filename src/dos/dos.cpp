@@ -46,6 +46,7 @@
 #include "support.h"
 #include "parport.h"
 #include "serialport.h"
+#include "ttyserver.h"
 #include "dos_network.h"
 #include "render.h"
 #include "jfont.h"
@@ -3588,6 +3589,12 @@ static void ClearAnsi29h(void)
 
 static Bitu DOS_29Handler(void)
 {
+	/* Capture here for programs that call INT 29h directly; when we got here from
+	 * device_CON::Output that one already reported the character and this is a no-op.
+	 * The suppress guard keeps the INT 10h AH=0Eh calls below from capturing again. */
+	TTYSERVER_CharOut((uint8_t)reg_al);
+	TTYServerSuppress tty_suppress;
+
 	uint16_t tmp_ax = reg_ax;
 	uint16_t tmp_bx = reg_bx;
 	uint16_t tmp_cx = reg_cx;

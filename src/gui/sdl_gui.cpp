@@ -3250,7 +3250,7 @@ public:
                 "sblaster", "gus", "midi", "mixer",
                 "innova", "imfc", "joystick", "mapper",
                 "keyboard", "serial", "parallel", "printer",
-                "ipx", "ne2000", "ethernet, pcap", "ethernet, slirp",
+                "ipx", "ne2000", "ethernet, pcap", "ethernet, slirp", "ttyserver", "memmonserver",
                 "ide, primary", "ide, secondary", "ide, tertiary", "ide, quaternary",
                 "ide, quinternary", "ide, sexternary", "ide, septernary", "ide, octernary",
                 "fdc, primary",
